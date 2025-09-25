@@ -1,0 +1,22 @@
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+.env/
+.ipynb_checkpoints/
+
+# Build / tools
+obj_dir/
+*.vcd
+*.json
+*.log
+*.rpt
+
+# Results
+results/figs/*
+results/logs/*
+results/tables/*
+
+# OS
+.DS_Store

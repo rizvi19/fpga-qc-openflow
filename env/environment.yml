@@ -1,0 +1,17 @@
+
+name: qcbench
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.11
+  - numpy
+  - scipy
+  - pandas
+  - matplotlib
+  - jupyter
+  - tqdm
+  - pip
+  - pip:
+      - vcdvcd
+      - scikit-learn

@@ -1,0 +1,11 @@
+
+# Generic synthesis + stats
+read_verilog rtl/*.sv
+hierarchy -check -top qc_top
+synth -top qc_top
+stat
+write_json qc_top_generic.json
+
+# ECP5 flow (optional device-specific stats)
+synth_ecp5 -json qc_top_ecp5.json
+stat
