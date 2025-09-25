@@ -1,7 +1,16 @@
-module qc_top(
+
+module qc_top #(
+    parameter N_QUBITS = 4
+)(
     input  logic clk,
     input  logic start,
-    output logic done
+    output logic done,
+    output logic [31:0] cycle_count
 );
-    scheduler sched(.clk(clk), .start(start), .done(done));
+    scheduler #(.N_QUBITS(N_QUBITS)) u_sched (
+        .clk(clk),
+        .start(start),
+        .done(done),
+        .cycle_count(cycle_count)
+    );
 endmodule

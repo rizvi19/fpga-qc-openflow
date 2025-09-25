@@ -1,3 +1,4 @@
+
 #include "verilated.h"
 #include "verilated_vcd_c.h"
 #include "Vqc_top.h"
@@ -17,7 +18,6 @@ int main(int argc, char** argv) {
     top->trace(tfp, 99);
     tfp->open("obj_dir/qc_top.vcd");
 
-    // Resetless simple design; just drive clock/start
     top->clk = 0;
     top->start = 0;
 
@@ -25,31 +25,27 @@ int main(int argc, char** argv) {
         top->clk = !top->clk;
         top->eval();
         tfp->dump(main_time);
-        main_time += 5; // 5 ns half-period => 100 MHz illustrative
+        main_time += 5; // 5 ns half-period
     };
 
-    // 4 cycles idle
+    // idle a few cycles
     for (int i = 0; i < 8; ++i) tick();
 
-    // Pulse start for 1 cycle
-    top->start = 1;
-    tick();
+    // pulse start
+    top->start = 1; tick();
     top->start = 0;
 
-    // Run for some cycles, expect 'done' to assert (stub does when start seen)
     bool seen_done = false;
-    for (int i = 0; i < 50; ++i) {
+    for (int i = 0; i < 200; ++i) {
         tick();
-        if (top->done) seen_done = true;
+        if (top->done) { seen_done = true; break; }
     }
 
-    printf("[SIM] done=%d (expected 1)\n", (int)seen_done);
+    printf("[SIM] done=%d, cycle_count=%u\n", (int)seen_done, top->cycle_count);
 
-    // Finish
     top->final();
     tfp->close();
     delete tfp;
     delete top;
-
     return seen_done ? 0 : 1;
 }
