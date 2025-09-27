@@ -1,0 +1,29 @@
+name: fpga_core-bench
+
+on:
+  workflow_dispatch:
+
+jobs:
+  bench:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y verilator python3-matplotlib python3-numpy python3-scipy
+      - name: Build FPGA simulator
+        run: make -C fpga_core -j
+      - name: Run benchmarks
+        run: make bench
+      - name: Generate plots
+        run: make plots
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: bench-results
+          path: |
+            experiments/results/results.csv
+            experiments/results/*.png
+            experiments/results/logs
+          if-no-files-found: warn

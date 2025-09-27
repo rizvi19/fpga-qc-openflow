@@ -1,0 +1,89 @@
+name: fpga_core-ci
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  lint:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Verilator
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y verilator build-essential pkg-config
+      - name: Lint
+        working-directory: fpga_core
+        run: make lint
+      - name: Job Summary
+        if: success()
+        run: |
+          echo "### Lint ✅" >> $GITHUB_STEP_SUMMARY
+          echo "- Verilator lint passed with no warnings." >> $GITHUB_STEP_SUMMARY
+
+  build-and-test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-22.04, ubuntu-24.04]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Verilator
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y verilator build-essential pkg-config
+      - name: Build and run regression
+        working-directory: fpga_core
+        run: |
+          set -euo pipefail
+          make clean
+          make test
+      - name: Job Summary
+        if: success()
+        run: |
+          echo "### FPGA sims on ${{ runner.os }} ✅" >> $GITHUB_STEP_SUMMARY
+          echo "- qft2, qft4, grover2, bell2 all passed" >> $GITHUB_STEP_SUMMARY
+      - name: Archive artifacts on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: failure-artifacts-${{ matrix.os }}
+          path: |
+            fpga_core/obj_dir/**/*.vcd
+            fpga_core/obj_dir/**/*.log
+            fpga_core/obj_dir/**/V*.mk
+            fpga_core/obj_dir/**/V*.cpp
+            fpga_core/obj_dir/Makefile
+          if-no-files-found: ignore
+
+  coverage:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Verilator
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y verilator build-essential pkg-config
+      - name: Run coverage
+        working-directory: fpga_core
+        run: |
+          set -euo pipefail
+          make cover
+          cat cov/summary.txt
+      - name: Upload coverage artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage
+          path: |
+            fpga_core/cov/summary.txt
+            fpga_core/cov/coverage.dat
+            fpga_core/cov/annot
+          if-no-files-found: ignore
+      - name: Job Summary
+        if: success()
+        run: |
+          echo "### Coverage ✅" >> $GITHUB_STEP_SUMMARY
+          echo "- Combined coverage summary:" >> $GITHUB_STEP_SUMMARY
+          sed 's/^/  /' fpga_core/cov/summary.txt >> $GITHUB_STEP_SUMMARY || true

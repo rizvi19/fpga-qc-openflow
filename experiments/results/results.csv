@@ -1,0 +1,10 @@
+timestamp,git_sha,host,prog,fpga_cycles,cpu_ms,status
+2025-09-27T01:45:11.550167,84bbacf,Shahriars-Unix,qft2,85.0,0.060236,ok
+2025-09-27T01:45:11.550167,84bbacf,Shahriars-Unix,qft3,,0.080079,unsupported
+2025-09-27T01:45:11.550167,84bbacf,Shahriars-Unix,qft4,237.0,0.120565,ok
+2025-09-27T01:45:11.550167,84bbacf,Shahriars-Unix,qft5,,0.287,unsupported
+2025-09-27T01:45:11.550167,84bbacf,Shahriars-Unix,qft6,,1.069423,unsupported
+2025-09-27T01:45:11.550167,84bbacf,Shahriars-Unix,grover2,285.0,0.073956,ok
+2025-09-27T01:45:11.550167,84bbacf,Shahriars-Unix,grover3,,0.095136,unsupported
+2025-09-27T01:45:11.550167,84bbacf,Shahriars-Unix,grover4,,0.070062,unsupported
+2025-09-27T01:45:11.550167,84bbacf,Shahriars-Unix,bell2,51.0,0.112803,ok
