@@ -37,8 +37,11 @@ The HDL core under `fpga_core/` now builds warning-free with Verilator 5.x and G
 cd fpga_core
 make clean
 make sim_qft2
+make sim_qft3
 make sim_qft4
 make sim_grover2
+make sim_grover3
+make sim_grover4
 make sim_bell2
 ```
 

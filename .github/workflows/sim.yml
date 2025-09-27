@@ -87,3 +87,32 @@ jobs:
           echo "### Coverage ✅" >> $GITHUB_STEP_SUMMARY
           echo "- Combined coverage summary:" >> $GITHUB_STEP_SUMMARY
           sed 's/^/  /' fpga_core/cov/summary.txt >> $GITHUB_STEP_SUMMARY || true
+
+  bench:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y verilator python3-matplotlib python3-numpy
+      - name: Build FPGA sim
+        working-directory: fpga_core
+        run: make -j
+      - name: Run bench
+        env:
+          FCLK_HZ: "100000000"
+        run: make bench
+      - name: Generate plots
+        env:
+          FCLK_HZ: "100000000"
+        run: python3 experiments/plot_results.py --fclk-hz 100e6
+      - name: Upload bench artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: bench-results
+          path: |
+            experiments/results/results.csv
+            experiments/results/*scaling_*.png
+            experiments/results/legacy_scaling_*.png
+          if-no-files-found: warn

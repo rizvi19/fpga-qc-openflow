@@ -28,7 +28,10 @@ VFLAGS     := -Wall --trace -O3 --cc --exe --build \
               -Wno-UNOPTFLAT -Wno-fatal \
               --Mdir $(BUILD_DIR)
 
-.PHONY: all lint test sim_qft2 sim_qft4 sim_grover2 sim_bell2 cover waves clean
+.PHONY: all lint test \
+	sim_qft2 sim_qft3 sim_qft4 \
+	sim_grover2 sim_grover3 sim_grover4 \
+	sim_bell2 cover waves clean synth
 
 all: sim_qft4
 
@@ -38,11 +41,20 @@ $(SIM): $(RTL) $(TB)
 sim_qft2: $(SIM)
 	./$(SIM) +prog=qft2
 
+sim_qft3: $(SIM)
+	./$(SIM) +prog=qft3
+
 sim_qft4: $(SIM)
 	./$(SIM) +prog=qft4
 
 sim_grover2: $(SIM)
 	./$(SIM) +prog=grover2
+
+sim_grover3: $(SIM)
+	./$(SIM) +prog=grover3
+
+sim_grover4: $(SIM)
+	./$(SIM) +prog=grover4
 
 sim_bell2: $(SIM)
 	./$(SIM) +prog=bell2
@@ -51,6 +63,19 @@ lint:
 	$(VERILATOR) -Wall --lint-only $(RTL) --top-module $(TOP)
 
 test: sim_qft2 sim_qft4 sim_grover2 sim_bell2
+
+# Optional Vivado synthesis (requires ENABLE_VIVADO=1 and vivado on PATH)
+synth:
+	@if [ -z "$(ENABLE_VIVADO)" ]; then \
+		echo "[synth] ENABLE_VIVADO not set; skipping"; \
+		exit 0; \
+	fi
+	@if ! command -v vivado >/dev/null 2>&1; then \
+		echo "[synth] vivado not found on PATH"; \
+		exit 1; \
+	fi
+	@echo "[synth] Launching Vivado in batch mode"
+	vivado -mode batch -source synth/vivado.tcl
 
 # Coverage
 COV_DIR    := cov

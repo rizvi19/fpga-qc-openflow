@@ -4,7 +4,7 @@ module qc_top #(
 )(
     input  logic clk,
     input  logic start,
-    input  logic [1:0] prog_id,
+    input  logic [2:0] prog_id,
     output logic done,
     output logic [31:0] cycle_count
 );

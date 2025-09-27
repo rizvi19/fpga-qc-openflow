@@ -4,7 +4,7 @@ module scheduler #(
 )(
     input  logic clk,
     input  logic start,
-    input  logic [1:0] prog_id,
+    input  logic [2:0] prog_id,
     output logic done,
     output logic [31:0] cycle_count
 );
@@ -22,6 +22,7 @@ module scheduler #(
     localparam [3:0] OP_CNOT   = 4'd4;
     localparam [3:0] OP_CPHASE = 4'd5;
     localparam [3:0] OP_SWAP   = 4'd6;
+    localparam [3:0] OP_MASKPHASE = 4'd7;
     localparam [3:0] OP_END    = 4'd15;
 
     // Dimensions
@@ -201,7 +202,7 @@ module scheduler #(
                     pair_stage_next = 1'b0;
                     if (opcode == OP_H || opcode == OP_X || opcode == OP_CNOT) begin
                         st_next = S_EXEC_PAIR;
-                    end else if (opcode == OP_Z || opcode == OP_CPHASE) begin
+                    end else if (opcode == OP_Z || opcode == OP_CPHASE || opcode == OP_MASKPHASE) begin
                         st_next = S_EXEC_DIAG;
                     end else if (opcode == OP_SWAP) begin
                         st_next = S_EXEC_SWAP;
@@ -279,6 +280,26 @@ module scheduler #(
                     if (is_bit_set(idx, target) && is_bit_set(idx, control_q2)) begin
                         din_a_r_next = ph_out_r;
                         din_a_i_next = ph_out_i;
+                        we_a_next    = 1'b1;
+                    end
+                end else if (opcode == OP_MASKPHASE) begin
+                    // target encodes mask bits [3:0], control_q2 encodes match bits [3:0]
+                    logic [AW-1:0] mask_bits;
+                    logic [AW-1:0] match_bits;
+                    mask_bits  = '0;
+                    match_bits = '0;
+                    for (int unsigned b = 0; b < AW && b < 4; ++b) begin
+                        mask_bits[b]  = target[b];
+                        match_bits[b] = control_q2[b];
+                    end
+                    if ( (idx & mask_bits) == match_bits ) begin
+                        if (angle_id == 8'd1) begin
+                            din_a_r_next = -dout_a_r;
+                            din_a_i_next = -dout_a_i;
+                        end else begin
+                            din_a_r_next = ph_out_r;
+                            din_a_i_next = ph_out_i;
+                        end
                         we_a_next    = 1'b1;
                     end
                 end
